@@ -90,6 +90,16 @@ func TestIterFunc(t *testing.T) {
 	}
 }
 
+func TestClear(t *testing.T) {
+	length := 5
+	om := makeOMap(length)
+
+	om.Clear()
+	if om.Len() != 0 {
+		t.Errorf("om.Len() = %d, want 0", om.Len())
+	}
+}
+
 func TestInsert(t *testing.T) {
 	length := 5
 	om := makeOMap(length)
