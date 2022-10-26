@@ -20,20 +20,25 @@ import (
 )
 
 func main() {
-	om := omap.New[int, string]()
+	om := omap.New[string, string]()
 
-	om.Set(0, "foo")
-	om.Set(1, "bar")
+	om.Set("a", "foo")
+	om.Set("b", "bar")
+	om.Set("c", "baz")
 
-	if v, ok := om.Get(0); ok {
+	if v, ok := om.Get("a"); ok {
 		fmt.Println(v) // print "foo"
 	}
 
-	om.Delete(0)
-	if _, ok := om.Get(0); !ok {
+	if e, ok := om.GetAt(1); ok {
+		fmt.Println(e.Key, e.Value) // print "bar"
+	}
+
+	om.DeleteAt(-1) // delete "c:baz"
+	if _, ok := om.Get("c"); !ok {
 		fmt.Println("not found") // print "not found"
 	}
 
-	fmt.Println(om) // print "OrderedMap[1:bar]"
+	fmt.Println(om) // print "OrderedMap[a:foo b:bar]"
 }
 ```
