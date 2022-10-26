@@ -89,3 +89,23 @@ func TestIterFunc(t *testing.T) {
 		}
 	}
 }
+
+func TestInsert(t *testing.T) {
+	length := 5
+	om := makeOMap(length)
+
+	key := 10
+	value := "10"
+	om.Insert(1, key, value)
+
+	items := om.Items()
+	if i0 := items[0]; i0.Key != 0 || i0.Value != "0" {
+		t.Errorf("items[0] = %v, want {0, 0}", i0)
+	}
+	if i1 := items[1]; i1.Key != key || i1.Value != value {
+		t.Errorf("items[1] = %v, want {%d, %s}", i1, key, value)
+	}
+	if i2 := items[2]; i2.Key != 1 || i2.Value != "1" {
+		t.Errorf("items[2] = %v, want {1, 1}", i2)
+	}
+}
