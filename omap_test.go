@@ -145,3 +145,26 @@ func TestToHeadAndTail(t *testing.T) {
 		t.Errorf("keys = %v, want [3, 1, 2, 4, 0]", keys)
 	}
 }
+
+func TestPop(t *testing.T) {
+	length := 5
+	om := makeOMap(length)
+
+	key := 3
+	e, ok := om.Pop(key)
+	if !ok {
+		t.Errorf("Pop(%d) failed", key)
+	}
+	if e.Key != key || e.Value != strconv.Itoa(key) {
+		t.Errorf("Pop(%d) = %v, want {%d, %d}", key, e, key, key)
+	}
+
+	index := -1
+	e, ok = om.PopAt(index)
+	if !ok {
+		t.Errorf("Pop(%d) failed", index)
+	}
+	if e.Key != 4 || e.Value != "4" {
+		t.Errorf("Pop(%d) = %v, want {4, 4}", index, e)
+	}
+}

@@ -14,6 +14,11 @@ type OrderedMap[K comparable, V any] struct {
 	values map[K]V
 }
 
+type Entry[K comparable, V any] struct {
+	Key   K
+	Value V
+}
+
 func New[K comparable, V any]() *OrderedMap[K, V] {
 	root := &node[K]{}
 	root.prev = root
@@ -26,13 +31,41 @@ func New[K comparable, V any]() *OrderedMap[K, V] {
 	return om
 }
 
+func (om *OrderedMap[K, V]) Contains(key K) bool {
+	_, ok := om.values[key]
+	return ok
+}
+
 func (om *OrderedMap[K, V]) Get(key K) (V, bool) {
 	v, ok := om.values[key]
 	return v, ok
 }
 
+func (om *OrderedMap[K, V]) GetAt(index int) (*Entry[K, V], bool) {
+	length := om.Len()
+	if length == 0 {
+		return nil, false
+	}
+
+	var curr *node[K]
+	root := om.root
+	idx := index % length
+	if idx < 0 {
+		idx += length
+	}
+	curr = root.next
+	for i := 0; i < idx; i++ {
+		curr = curr.next
+		if curr == root {
+			curr = curr.next
+		}
+	}
+
+	return newEntry(curr.key, om.values[curr.key]), true
+}
+
 func (om *OrderedMap[K, V]) Set(key K, value V) {
-	if _, ok := om.nodes[key]; ok {
+	if om.Contains(key) {
 		om.values[key] = value
 		return
 	}
@@ -50,15 +83,29 @@ func (om *OrderedMap[K, V]) Set(key K, value V) {
 	om.values[key] = value
 }
 
-func (om *OrderedMap[K, V]) Delete(key K) {
-	n, ok := om.nodes[key]
-	if !ok {
+func (om *OrderedMap[K, V]) Insert(index int, key K, value V) {
+	e, ok := om.GetAt(index)
+	if !ok || e.Key == key {
+		om.Set(key, value)
 		return
 	}
-	n.prev.next = n.next
-	n.next.prev = n.prev
-	delete(om.nodes, key)
-	delete(om.values, key)
+	om.Delete(key)
+
+	neibor := om.nodes[e.Key]
+	n := &node[K]{key: key}
+	if index >= 0 {
+		n.prev = neibor.prev
+		n.next = neibor
+		neibor.prev.next = n
+		neibor.prev = n
+	} else {
+		n.prev = neibor
+		n.next = neibor.next
+		neibor.next.prev = n
+		neibor.next = n
+	}
+	om.nodes[key] = n
+	om.values[key] = value
 }
 
 func (om *OrderedMap[K, V]) Clear() {
@@ -68,47 +115,42 @@ func (om *OrderedMap[K, V]) Clear() {
 	}
 }
 
-func (om *OrderedMap[K, V]) DeleteAt(index int) {
-	var curr *node[K]
-	root := om.root
-	length := index % om.Len()
-	if length < 0 {
-		length += om.Len()
+func (om *OrderedMap[K, V]) Delete(key K) bool {
+	n, ok := om.nodes[key]
+	if ok {
+		n.prev.next = n.next
+		n.next.prev = n.prev
+		delete(om.nodes, key)
+		delete(om.values, key)
 	}
-	curr = root.next
-	for i := 0; i < length; i++ {
-		curr = curr.next
-		if curr == root {
-			curr = curr.next
-		}
-	}
-
-	om.Delete(curr.key)
+	return ok
 }
 
-func (om *OrderedMap[K, V]) Insert(index int, key K, value V) {
-	om.Delete(key)
-
-	var curr *node[K]
-	root := om.root
-	curr = root
-	for i := 0; i < index; i++ {
-		curr = curr.next
-		if curr == root {
-			curr = curr.prev
-			break
-		}
+func (om *OrderedMap[K, V]) DeleteAt(index int) bool {
+	e, ok := om.GetAt(index)
+	if !ok {
+		return false
 	}
 
-	n := &node[K]{
-		key:  key,
-		prev: curr,
-		next: curr.next,
+	return om.Delete(e.Key)
+}
+
+func (om *OrderedMap[K, V]) Pop(key K) (*Entry[K, V], bool) {
+	v, ok := om.Get(key)
+	if !ok {
+		return nil, false
 	}
-	curr.next.prev = n
-	curr.next = n
-	om.nodes[key] = n
-	om.values[key] = value
+
+	return newEntry(key, v), om.Delete(key)
+}
+
+func (om *OrderedMap[K, V]) PopAt(index int) (*Entry[K, V], bool) {
+	e, ok := om.GetAt(index)
+	if !ok {
+		return nil, false
+	}
+
+	return e, om.Delete(e.Key)
 }
 
 func (om *OrderedMap[K, V]) Len() int {
@@ -121,11 +163,6 @@ func (om *OrderedMap[K, V]) String() string {
 		builder[i] = fmt.Sprintf("%v:%v", item.Key, item.Value)
 	}
 	return fmt.Sprintf("OrderedMap%v", builder)
-}
-
-type Entry[K comparable, V any] struct {
-	Key   K
-	Value V
 }
 
 func newEntry[K comparable, V any](key K, value V) *Entry[K, V] {
