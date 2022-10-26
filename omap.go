@@ -19,6 +19,7 @@ type Entry[K comparable, V any] struct {
 	Value V
 }
 
+// New constructs an OrderedMap.
 func New[K comparable, V any]() *OrderedMap[K, V] {
 	root := &node[K]{}
 	root.prev = root
@@ -31,16 +32,19 @@ func New[K comparable, V any]() *OrderedMap[K, V] {
 	return om
 }
 
+// Contains checks if a key is in the map.
 func (om *OrderedMap[K, V]) Contains(key K) bool {
 	_, ok := om.values[key]
 	return ok
 }
 
+// Get returns the value for a key.
 func (om *OrderedMap[K, V]) Get(key K) (V, bool) {
 	v, ok := om.values[key]
 	return v, ok
 }
 
+// GetAt returns the key and value at a given index.
 func (om *OrderedMap[K, V]) GetAt(index int) (*Entry[K, V], bool) {
 	length := om.Len()
 	if length == 0 {
@@ -64,6 +68,7 @@ func (om *OrderedMap[K, V]) GetAt(index int) (*Entry[K, V], bool) {
 	return newEntry(curr.key, om.values[curr.key]), true
 }
 
+// Set sets the value for a key.
 func (om *OrderedMap[K, V]) Set(key K, value V) {
 	if om.Contains(key) {
 		om.values[key] = value
@@ -83,6 +88,7 @@ func (om *OrderedMap[K, V]) Set(key K, value V) {
 	om.values[key] = value
 }
 
+// Insert inserts a key and value at a given index.
 func (om *OrderedMap[K, V]) Insert(index int, key K, value V) {
 	e, ok := om.GetAt(index)
 	if !ok || e.Key == key {
@@ -108,6 +114,7 @@ func (om *OrderedMap[K, V]) Insert(index int, key K, value V) {
 	om.values[key] = value
 }
 
+// Clear clears the map.
 func (om *OrderedMap[K, V]) Clear() {
 	for key := range om.nodes {
 		delete(om.nodes, key)
@@ -115,6 +122,7 @@ func (om *OrderedMap[K, V]) Clear() {
 	}
 }
 
+// Delete deletes the value for a key.
 func (om *OrderedMap[K, V]) Delete(key K) bool {
 	n, ok := om.nodes[key]
 	if ok {
@@ -126,6 +134,7 @@ func (om *OrderedMap[K, V]) Delete(key K) bool {
 	return ok
 }
 
+// DeleteAt deletes the key and value at a given index.
 func (om *OrderedMap[K, V]) DeleteAt(index int) bool {
 	e, ok := om.GetAt(index)
 	if !ok {
@@ -135,6 +144,7 @@ func (om *OrderedMap[K, V]) DeleteAt(index int) bool {
 	return om.Delete(e.Key)
 }
 
+// Pop deletes and returns the key and value for a key.
 func (om *OrderedMap[K, V]) Pop(key K) (*Entry[K, V], bool) {
 	v, ok := om.Get(key)
 	if !ok {
@@ -144,6 +154,7 @@ func (om *OrderedMap[K, V]) Pop(key K) (*Entry[K, V], bool) {
 	return newEntry(key, v), om.Delete(key)
 }
 
+// PopAt deletes and returns the key and value at a given index.
 func (om *OrderedMap[K, V]) PopAt(index int) (*Entry[K, V], bool) {
 	e, ok := om.GetAt(index)
 	if !ok {
@@ -153,6 +164,7 @@ func (om *OrderedMap[K, V]) PopAt(index int) (*Entry[K, V], bool) {
 	return e, om.Delete(e.Key)
 }
 
+// Len returns the number of items in the map.
 func (om *OrderedMap[K, V]) Len() int {
 	return len(om.nodes)
 }
@@ -172,6 +184,7 @@ func newEntry[K comparable, V any](key K, value V) *Entry[K, V] {
 	}
 }
 
+// Keys returns the keys in the map.
 func (om *OrderedMap[K, V]) Keys() []K {
 	keys := make([]K, 0, om.Len())
 	for n := om.root.next; n != om.root; n = n.next {
@@ -180,6 +193,7 @@ func (om *OrderedMap[K, V]) Keys() []K {
 	return keys
 }
 
+// Values returns the values in the map.
 func (om *OrderedMap[K, V]) Values() []V {
 	values := make([]V, 0, om.Len())
 	for n := om.root.next; n != om.root; n = n.next {
@@ -188,6 +202,7 @@ func (om *OrderedMap[K, V]) Values() []V {
 	return values
 }
 
+// Items returns the items in the map.
 func (om *OrderedMap[K, V]) Items() []*Entry[K, V] {
 	items := make([]*Entry[K, V], 0, om.Len())
 	for n := om.root.next; n != om.root; n = n.next {
@@ -196,6 +211,7 @@ func (om *OrderedMap[K, V]) Items() []*Entry[K, V] {
 	return items
 }
 
+// IterFunc returns an iterator function over contained items.
 func (om *OrderedMap[K, V]) IterFunc() func() (*Entry[K, V], bool) {
 	var curr *node[K]
 	root := om.root
@@ -210,6 +226,7 @@ func (om *OrderedMap[K, V]) IterFunc() func() (*Entry[K, V], bool) {
 	}
 }
 
+// ToHead moves the item to the head of the map.
 func (om *OrderedMap[K, V]) ToHead(key K) {
 	n, ok := om.nodes[key]
 	if !ok {
@@ -226,6 +243,7 @@ func (om *OrderedMap[K, V]) ToHead(key K) {
 	head.prev = n
 }
 
+// ToTail moves the item to the tail of the map.
 func (om *OrderedMap[K, V]) ToTail(key K) {
 	n, ok := om.nodes[key]
 	if !ok {

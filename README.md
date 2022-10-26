@@ -31,7 +31,7 @@ func main() {
 
 	om.Delete(0)
 	if _, ok := om.Get(0); !ok {
-		fmt.Println("not found")
+		fmt.Println("not found") // print "not found"
 	}
 
 	fmt.Println(om) // print "OrderedMap[1:bar]"
