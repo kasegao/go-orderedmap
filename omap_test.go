@@ -109,3 +109,16 @@ func TestInsert(t *testing.T) {
 		t.Errorf("items[2] = %v, want {1, 1}", i2)
 	}
 }
+
+func TestToHeadAndTail(t *testing.T) {
+	length := 5
+	om := makeOMap(length)
+
+	om.ToHead(3)
+	om.ToTail(0)
+
+	keys := om.Keys()
+	if keys[0] != 3 || keys[1] != 1 || keys[2] != 2 || keys[3] != 4 || keys[4] != 0 {
+		t.Errorf("keys = %v, want [3, 1, 2, 4, 0]", keys)
+	}
+}

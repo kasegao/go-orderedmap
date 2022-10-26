@@ -38,13 +38,13 @@ func (om *OrderedMap[K, V]) Set(key K, value V) {
 	}
 
 	root := om.root
-	last := root.prev
+	tail := root.prev
 	n := &node[K]{
 		key:  key,
-		prev: last,
+		prev: tail,
 		next: root,
 	}
-	last.next = n
+	tail.next = n
 	root.prev = n
 	om.nodes[key] = n
 	om.values[key] = value
@@ -146,4 +146,36 @@ func (om *OrderedMap[K, V]) IterFunc() func() (*Entry[K, V], bool) {
 		curr = curr.next
 		return item, true
 	}
+}
+
+func (om *OrderedMap[K, V]) ToHead(key K) {
+	n, ok := om.nodes[key]
+	if !ok {
+		return
+	}
+
+	n.prev.next = n.next
+	n.next.prev = n.prev
+
+	head := om.root.next
+	n.prev = om.root
+	om.root.next = n
+	n.next = head
+	head.prev = n
+}
+
+func (om *OrderedMap[K, V]) ToTail(key K) {
+	n, ok := om.nodes[key]
+	if !ok {
+		return
+	}
+
+	n.prev.next = n.next
+	n.next.prev = n.prev
+
+	tail := om.root.prev
+	n.prev = tail
+	tail.next = n
+	n.next = om.root
+	om.root.prev = n
 }
