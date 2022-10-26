@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func makeOMap(length int) *orderedMap[int, string] {
+func makeOMap(length int) *OrderedMap[int, string] {
 	om := New[int, string]()
 	for i := 0; i < length; i++ {
 		om.Set(i, strconv.Itoa(i))

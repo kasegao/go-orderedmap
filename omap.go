@@ -8,17 +8,17 @@ type node[K comparable] struct {
 	next *node[K]
 }
 
-type orderedMap[K comparable, V any] struct {
+type OrderedMap[K comparable, V any] struct {
 	root   *node[K]
 	nodes  map[K]*node[K]
 	values map[K]V
 }
 
-func New[K comparable, V any]() *orderedMap[K, V] {
+func New[K comparable, V any]() *OrderedMap[K, V] {
 	root := &node[K]{}
 	root.prev = root
 	root.next = root
-	om := &orderedMap[K, V]{
+	om := &OrderedMap[K, V]{
 		root:   root,
 		nodes:  make(map[K]*node[K]),
 		values: make(map[K]V),
@@ -26,12 +26,12 @@ func New[K comparable, V any]() *orderedMap[K, V] {
 	return om
 }
 
-func (om *orderedMap[K, V]) Get(key K) (V, bool) {
+func (om *OrderedMap[K, V]) Get(key K) (V, bool) {
 	v, ok := om.values[key]
 	return v, ok
 }
 
-func (om *orderedMap[K, V]) Set(key K, value V) {
+func (om *OrderedMap[K, V]) Set(key K, value V) {
 	if _, ok := om.nodes[key]; ok {
 		om.values[key] = value
 		return
@@ -50,7 +50,7 @@ func (om *orderedMap[K, V]) Set(key K, value V) {
 	om.values[key] = value
 }
 
-func (om *orderedMap[K, V]) Delete(key K) {
+func (om *OrderedMap[K, V]) Delete(key K) {
 	n, ok := om.nodes[key]
 	if !ok {
 		return
@@ -61,11 +61,11 @@ func (om *orderedMap[K, V]) Delete(key K) {
 	delete(om.values, key)
 }
 
-func (om *orderedMap[K, V]) Len() int {
+func (om *OrderedMap[K, V]) Len() int {
 	return len(om.nodes)
 }
 
-func (om *orderedMap[K, V]) String() string {
+func (om *OrderedMap[K, V]) String() string {
 	builder := make([]string, len(om.nodes))
 	for i, item := range om.Items() {
 		builder[i] = fmt.Sprintf("%v:%v", item.Key, item.Value)
@@ -73,19 +73,19 @@ func (om *orderedMap[K, V]) String() string {
 	return fmt.Sprintf("OrderedMap%v", builder)
 }
 
-type entry[K comparable, V any] struct {
+type Entry[K comparable, V any] struct {
 	Key   K
 	Value V
 }
 
-func newEntry[K comparable, V any](key K, value V) *entry[K, V] {
-	return &entry[K, V]{
+func newEntry[K comparable, V any](key K, value V) *Entry[K, V] {
+	return &Entry[K, V]{
 		Key:   key,
 		Value: value,
 	}
 }
 
-func (om *orderedMap[K, V]) Keys() []K {
+func (om *OrderedMap[K, V]) Keys() []K {
 	keys := make([]K, 0, om.Len())
 	for n := om.root.next; n != om.root; n = n.next {
 		keys = append(keys, n.key)
@@ -93,7 +93,7 @@ func (om *orderedMap[K, V]) Keys() []K {
 	return keys
 }
 
-func (om *orderedMap[K, V]) Values() []V {
+func (om *OrderedMap[K, V]) Values() []V {
 	values := make([]V, 0, om.Len())
 	for n := om.root.next; n != om.root; n = n.next {
 		values = append(values, om.values[n.key])
@@ -101,19 +101,19 @@ func (om *orderedMap[K, V]) Values() []V {
 	return values
 }
 
-func (om *orderedMap[K, V]) Items() []*entry[K, V] {
-	items := make([]*entry[K, V], 0, om.Len())
+func (om *OrderedMap[K, V]) Items() []*Entry[K, V] {
+	items := make([]*Entry[K, V], 0, om.Len())
 	for n := om.root.next; n != om.root; n = n.next {
 		items = append(items, newEntry(n.key, om.values[n.key]))
 	}
 	return items
 }
 
-func (om *orderedMap[K, V]) IterFunc() func() (*entry[K, V], bool) {
+func (om *OrderedMap[K, V]) IterFunc() func() (*Entry[K, V], bool) {
 	var curr *node[K]
 	root := om.root
 	curr = root.next
-	return func() (*entry[K, V], bool) {
+	return func() (*Entry[K, V], bool) {
 		if curr == root {
 			return nil, false
 		}
