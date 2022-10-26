@@ -68,6 +68,24 @@ func (om *OrderedMap[K, V]) Clear() {
 	}
 }
 
+func (om *OrderedMap[K, V]) DeleteAt(index int) {
+	var curr *node[K]
+	root := om.root
+	length := index % om.Len()
+	if length < 0 {
+		length += om.Len()
+	}
+	curr = root.next
+	for i := 0; i < length; i++ {
+		curr = curr.next
+		if curr == root {
+			curr = curr.next
+		}
+	}
+
+	om.Delete(curr.key)
+}
+
 func (om *OrderedMap[K, V]) Insert(index int, key K, value V) {
 	om.Delete(key)
 

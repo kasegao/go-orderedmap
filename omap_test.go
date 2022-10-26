@@ -100,6 +100,19 @@ func TestClear(t *testing.T) {
 	}
 }
 
+func TestDeleteAt(t *testing.T) {
+	length := 5
+	om := makeOMap(length)
+
+	om.DeleteAt(2)
+	om.DeleteAt(-1)
+
+	keys := om.Keys()
+	if keys[0] != 0 || keys[1] != 1 || keys[2] != 3 {
+		t.Errorf("keys = %v, want [0, 1, 3]", keys)
+	}
+}
+
 func TestInsert(t *testing.T) {
 	length := 5
 	om := makeOMap(length)
