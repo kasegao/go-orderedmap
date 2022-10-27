@@ -39,6 +39,29 @@ func New[K comparable, V any]() *OrderedMap[K, V] {
 	return om
 }
 
+// NewOMap constructs an OrderedMap (same as New()).
+func NewOMap[K comparable, V any]() *OrderedMap[K, V] {
+	return New[K, V]()
+}
+
+// NewEntry constructs an Entry.
+func NewEntry[K comparable, V any](key K, value V) *Entry[K, V] {
+	return &Entry[K, V]{Key: key, Value: value}
+}
+
+// Make constructs an OrderedMap from a list of entries.
+func Make[K comparable, V any](entries []*Entry[K, V]) *OrderedMap[K, V] {
+	om := New[K, V]()
+	for _, e := range entries {
+		om.Set(e.Key, e.Value)
+	}
+	return om
+}
+
+func (e *Entry[K, V]) String() string {
+	return fmt.Sprintf("Entry{key: %v, value: %v}", e.Key, e.Value)
+}
+
 // Contains checks if a key is in the map.
 func (om *OrderedMap[K, V]) Contains(key K) (ok bool) {
 	_, ok = om.nodes[key]
